@@ -1,0 +1,16 @@
+[
+{
+  "modid": "whisperingshout",
+  "name": "Whispering Shout",
+  "description": "A ranged chat mod",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Hexillium"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
