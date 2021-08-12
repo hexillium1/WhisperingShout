@@ -2,6 +2,7 @@ package me.hexillium.whisperingshout.commands;
 
 import me.hexillium.whisperingshout.ChatUtil;
 import me.hexillium.whisperingshout.Config;
+import me.hexillium.whisperingshout.WhisperingShout;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -21,7 +22,7 @@ public class Shout extends CommandBase {
 
     public Shout(){
         aliases = new ArrayList<>();
-        Collections.addAll(aliases, "s", "sh", "yell", "scream", "talklikemorgan");
+        Collections.addAll(aliases, "s", "sh", "yell", "scream");
     }
 
     @Override
@@ -41,7 +42,7 @@ public class Shout extends CommandBase {
     @Override
     @Nonnull
     public String getUsage(@Nonnull ICommandSender sender) {
-        return "Talks to players within " + Config.shout_range + " blocks range.";
+        return "/shout [text?... ...]";
     }
 
     @Override
@@ -50,14 +51,19 @@ public class Shout extends CommandBase {
             sender.sendMessage(new TextComponentString("This command can only be used by an in-game player."));
             return;
         }
-        String message = String.join(" ", args);
-        if (message.matches("^ *$")) return;
         if (!Config.shout_enabled){
             sender.sendMessage(new TextComponentString("This command has been disabled in the config.").setStyle(new Style().setColor(TextFormatting.RED)));
             return;
         }
-        ChatUtil.message((EntityPlayerMP) sender, Config.shout_range, Config.shout_squareRange, Config.shout_check_dimension, Config.shout_showDistances, ChatUtil.formatMessage("[Shout] " + sender.getName() + " ", TextFormatting.YELLOW), new TextComponentString(message), server.getPlayerList().getPlayers());
-        server.logInfo("SHOUT [" + Config.shout_range + "m] <" + sender.getName() + "> " + message);
+        String message = String.join(" ", args);
+        if (message.matches("^\\s*$")){
+            ChatType pref = WhisperingShout.registerDefault((EntityPlayerMP) sender, ChatType.SHOUT);
+            sender.sendMessage(new TextComponentString("You have toggled to chatting in " + pref.toString() + " mode."));
+            return;
+        }
+        ChatUtil.sendShout((EntityPlayerMP) sender, new TextComponentString(message), server.getPlayerList().getPlayers());
+//        ChatUtil.message((EntityPlayerMP) sender, Config.shout_range, Config.shout_squareRange, Config.shout_check_dimension, Config.shout_showDistances, ChatUtil.formatMessage("[Shout] " + sender.getName() + " ", TextFormatting.YELLOW), new TextComponentString(message), server.getPlayerList().getPlayers());
+//        server.logInfo("SHOUT [" + Config.shout_range + "m] <" + sender.getName() + "> " + message);
     }
 
 

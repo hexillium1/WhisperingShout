@@ -2,6 +2,7 @@ package me.hexillium.whisperingshout.commands;
 
 import me.hexillium.whisperingshout.ChatUtil;
 import me.hexillium.whisperingshout.Config;
+import me.hexillium.whisperingshout.WhisperingShout;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -41,7 +42,7 @@ public class OutOfCharacter extends CommandBase {
     @Override
     @Nonnull
     public String getUsage(@Nonnull ICommandSender sender) {
-        return "Talks to players globally.";
+        return "/ooc [text?... ...]";
     }
 
     @Override
@@ -50,19 +51,24 @@ public class OutOfCharacter extends CommandBase {
             sender.sendMessage(new TextComponentString("This command can only be used by an in-game player."));
             return;
         }
-        String message = String.join(" ", args);
-        if (message.matches("^ *$")) return;
         if (!Config.outofcharacter_enabled){
             sender.sendMessage(new TextComponentString("This command has been disabled in the config.").setStyle(new Style().setColor(TextFormatting.RED)));
             return;
         }
-        ChatUtil.sendAll((EntityPlayerMP) sender, ChatUtil.formatMessage("[OOC] " + sender.getName() + " ", TextFormatting.GRAY), new TextComponentString(message), server.getPlayerList().getPlayers());
-        server.logInfo("OUTOFCHARACTER [global] <" + sender.getName() + "> " + message);
+        String message = String.join(" ", args);
+        if (message.matches("^\\s*$")) {
+            ChatType pref = WhisperingShout.registerDefault((EntityPlayerMP) sender, ChatType.OUT_OF_CHARACTER);
+            sender.sendMessage(new TextComponentString("You have toggled to chatting in " + pref.toString() + " mode."));
+            return;
+        }
+        ChatUtil.sendOOC((EntityPlayerMP) sender, new TextComponentString(message), server.getPlayerList().getPlayers());
+//        ChatUtil.sendAll((EntityPlayerMP) sender, ChatUtil.formatMessage("[OOC] " + sender.getName() + " ", TextFormatting.GRAY), new TextComponentString(message), server.getPlayerList().getPlayers());
+//        server.logInfo("OUTOFCHARACTER [global] <" + sender.getName() + "> " + message);
     }
 
     @Override
     public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
-        return true;
+        return sender instanceof EntityPlayerMP;
     }
 
     @Override

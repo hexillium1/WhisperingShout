@@ -2,6 +2,7 @@ package me.hexillium.whisperingshout.commands;
 
 import me.hexillium.whisperingshout.ChatUtil;
 import me.hexillium.whisperingshout.Config;
+import me.hexillium.whisperingshout.WhisperingShout;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -38,7 +39,7 @@ public class Whisper extends CommandBase {
     @Override
     @Nonnull
     public String getUsage(@Nonnull ICommandSender sender) {
-        return "Talks to players within " + Config.whisper_range + " blocks range.";
+        return "/whisper [text?... ...]";
     }
 
     @Override
@@ -47,14 +48,20 @@ public class Whisper extends CommandBase {
             sender.sendMessage(new TextComponentString("This command can only be used by an in-game player."));
             return;
         }
-        String message = String.join(" ", args);
-        if (message.matches("^ *$")) return;
         if (!Config.whisper_enabled){
             sender.sendMessage(new TextComponentString("This command has been disabled in the config.").setStyle(new Style().setColor(TextFormatting.RED)));
             return;
         }
-        ChatUtil.message((EntityPlayerMP) sender, Config.whisper_range, Config.whisper_squareRange, Config.whisper_check_dimension, Config.whisper_showDistances, ChatUtil.formatMessage("[Whisper] " + sender.getName() + " ", TextFormatting.DARK_GREEN), new TextComponentString(message), server.getPlayerList().getPlayers());
-        server.logInfo("WHISPER [" + Config.whisper_range + "m] <" + sender.getName() + "> " + message);
+        String message = String.join(" ", args);
+        if (message.matches("^\\s*$")){
+            ChatType pref = WhisperingShout.registerDefault((EntityPlayerMP) sender, ChatType.WHISPER);
+            sender.sendMessage(new TextComponentString("You have toggled to chatting in " + pref.toString() + " mode."));
+            return;
+        }
+
+        ChatUtil.sendWhisper((EntityPlayerMP) sender, new TextComponentString(message), server.getPlayerList().getPlayers());
+//        ChatUtil.message((EntityPlayerMP) sender, Config.whisper_range, Config.whisper_squareRange, Config.whisper_check_dimension, Config.whisper_showDistances, ChatUtil.formatMessage("[Whisper] " + sender.getName() + " ", TextFormatting.DARK_GREEN), new TextComponentString(message), server.getPlayerList().getPlayers());
+//        server.logInfo("WHISPER [" + Config.whisper_range + "m] <" + sender.getName() + "> " + message);
     }
 
     @Override
